@@ -8,7 +8,8 @@ set(
     src/network.c
     src/storage.c
     src/protocol/minecraft.c
+    src/cJSON.c
 )
 
 add_executable(IniKiwiNetExplorer ${SRCS} ${HEADERS})
-target_link_libraries(IniKiwiNetExplorer PRIVATE sqlite3 pthread json-c)
+target_link_libraries(IniKiwiNetExplorer PRIVATE sqlite3 pthread )

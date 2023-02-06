@@ -17,4 +17,4 @@ typedef struct{
     char* protocol_str;
 } minecraft_server_info_t;
 
-minecraft_server_info_t protocol_get_minecraft_server_info(int sockfd, port_t addr, struct network_task_info info);
+minecraft_server_info_t protocol_get_minecraft_server_info(int sockfd, port_t addr, struct network_task_info info, char* msg);

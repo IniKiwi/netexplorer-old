@@ -52,6 +52,8 @@ port_t network_addr_req(const char* addr, uint16_t port, struct network_task_inf
     struct timeval timeout;      
     timeout.tv_sec = 0;
     timeout.tv_usec = info.timeout;
+    char* msg = malloc(1500);
+    strcpy(msg,"");
     
     setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
     setsockopt (sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
@@ -68,7 +70,7 @@ port_t network_addr_req(const char* addr, uint16_t port, struct network_task_inf
         port_result.type = PORT_TYPE_UNKNOW;
         if(port == 25565){
             port_result.type = PORT_TYPE_MINECRAFT;
-            minecraft_server_info_t res = protocol_get_minecraft_server_info(sockfd, port_result, info);
+            minecraft_server_info_t res = protocol_get_minecraft_server_info(sockfd, port_result, info, msg);
         }
 
         storage_save_port(port_result);
@@ -82,7 +84,9 @@ port_t network_addr_req(const char* addr, uint16_t port, struct network_task_inf
         return port_result;
     }
 
-    printf("try connect to %s:%d -> %s\n",addr,port,MSG_OK);
+    printf("try connect to %s:%d -> %s %s\n",addr,port,MSG_OK, msg);
+
+    free(msg);
     return port_result;
     
 }
@@ -132,7 +136,6 @@ int network_search_task(const char* addr, struct network_task_info info){
 
     char* sip_ptr = iplist;
     for(int i=0;i<4;i++){
-        printf("%s\n",sip_ptr);
         if(strcmp(sip_ptr,"*")==0){
             task_result[i][0] = 0;
             task_result[i][1] = 255;

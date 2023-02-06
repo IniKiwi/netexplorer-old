@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <json-c/json.h>
+#include "../cJSON.h"
 
 #define HANDSHAKE_SIZE 1024
 #define PROTOCOL_VERSION 210
@@ -41,7 +41,7 @@ int read_varint(const int sfd) {
     return result;
 }
 
-minecraft_server_info_t protocol_get_minecraft_server_info(int sockfd, port_t addr, struct network_task_info info){
+minecraft_server_info_t protocol_get_minecraft_server_info(int sockfd, port_t addr, struct network_task_info info, char* msg){
     char request[] = {0x1, 0x0};
     char byte;
 
@@ -101,12 +101,19 @@ minecraft_server_info_t protocol_get_minecraft_server_info(int sockfd, port_t ad
         json_r += nread;
     }
     result_json[json_len2] = '\0';
-    printf("%s\n",result_json);
+    //printf("%s\n",result_json);
 
+    cJSON* server_info_json = cJSON_Parse(result_json);
+    cJSON* description = cJSON_GetObjectItemCaseSensitive(server_info_json, "description");
+    cJSON* description_text = cJSON_GetObjectItemCaseSensitive(description, "text");
+    cJSON* players = cJSON_GetObjectItemCaseSensitive(server_info_json, "players");
+    cJSON* players_online = cJSON_GetObjectItemCaseSensitive(players, "online");
+    cJSON* players_max = cJSON_GetObjectItemCaseSensitive(players, "max");
+    cJSON* version = cJSON_GetObjectItemCaseSensitive(server_info_json, "version");
+    cJSON* version_name = cJSON_GetObjectItemCaseSensitive(version, "name");
 
-    //json_object obj = json_tokener_parse(result_json);
+    sprintf(msg,"(%s %d/%d %s)",cJSON_GetStringValue(description_text),players_online->valueint,players_max->valueint,cJSON_GetStringValue(version_name));
 
-
-    return (minecraft_server_info_t){.status = STATUS_FAIL};
+    return (minecraft_server_info_t){.status = STATUS_OK};
         
 }

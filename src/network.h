@@ -5,6 +5,13 @@
 #include <arpa/inet.h>
 #include <inttypes.h>
 
+#include <stdio.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include "storage.h"
+
 enum{
     LOG_ALL,
     LOG_OK
@@ -23,3 +30,4 @@ int network_search_local(uint8_t subnet, struct network_task_info info);
 int network_search_task(const char* addr, struct network_task_info info);
 int network_explore(const char* addr, struct network_task_info info);
 void* network_search_random(void* _info);
+void network_addr_req(const char* addr, uint16_t port, struct network_task_info info);

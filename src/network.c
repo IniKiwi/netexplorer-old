@@ -47,7 +47,7 @@ uint16_t search_ports[] = { 27,
     25565,  //minecraft java
 };
 
-port_t network_addr_req(const char* addr, uint16_t port, struct network_task_info info){
+void network_addr_req(const char* addr, uint16_t port, struct network_task_info info){
     int sockfd = socket(AF_INET,SOCK_STREAM,0);
     struct timeval timeout;      
     timeout.tv_sec = 0;
@@ -72,8 +72,13 @@ port_t network_addr_req(const char* addr, uint16_t port, struct network_task_inf
             port_result.type = PORT_TYPE_MINECRAFT;
             minecraft_server_info_t res = protocol_get_minecraft_server_info(sockfd, port_result, info, msg);
         }
+        if(port == 80){
+            port_result.type = PORT_TYPE_HTTP;
+            http_server_info_t res = protocol_get_http_server_info(sockfd, port_result, info, msg);
+            free(res.return_type);
+        }
 
-        storage_save_port(port_result);
+        //storage_save_port(port_result);
     }
     else{
         
@@ -81,13 +86,13 @@ port_t network_addr_req(const char* addr, uint16_t port, struct network_task_inf
     close(sockfd);
     if(port_result.type == 0){
         if(info.log_mode == LOG_ALL){printf("try connect to %s:%d -> %s\n",addr,port,MSG_FAIL);}
-        return port_result;
+        return;
     }
 
     printf("try connect to %s:%d -> %s %s\n",addr,port,MSG_OK, msg);
 
     free(msg);
-    return port_result;
+    return;
     
 }
 
@@ -159,8 +164,8 @@ int network_search_task(const char* addr, struct network_task_info info){
             }
         }
     }
-    free(tmpip);
     free(ip);
+    free(tmpip);
     free(iplist);
     return 0;
 }

@@ -8,6 +8,7 @@ set(
     src/network.c
     src/storage.c
     src/protocol/minecraft.c
+    src/protocol/http.c
     src/cJSON.c
 )
 

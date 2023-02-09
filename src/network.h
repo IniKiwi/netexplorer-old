@@ -22,7 +22,7 @@ struct network_task_info{
     uint32_t requests;
     uint32_t timeout;
     uint8_t log_mode;
-    uint16_t port;
+    uint32_t port;
 };
 
 int network_addr_search(const char* addr, struct network_task_info info);

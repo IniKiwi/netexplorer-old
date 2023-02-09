@@ -33,6 +33,7 @@ int main(int argc, char *argv[]){
         }
         else if(strcmp("-p",argv[a]) == 0){
             if(argc < a+1){exit(1);}
+            if(strcmp("random",argv[a+1]) == 0){info.port = -1; continue;}
             info.port = atoi(argv[a+1]);
         }
         else if(strcmp("-t",argv[a]) == 0){

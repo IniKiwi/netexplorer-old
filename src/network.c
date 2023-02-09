@@ -18,7 +18,7 @@
 #define MSG_OK "\e[1m\e[32mOK\e[39m\e[0m"
 #define MSG_FAIL "\e[1m\e[31mFAIL\e[39m\e[0m"
 
-uint16_t search_ports[] = { 27,
+uint16_t search_ports[] = { 28,
     20,     //FTP
     21,     //FTP
     22,     //SSH
@@ -41,6 +41,7 @@ uint16_t search_ports[] = { 27,
     1080,   //SOCKS (proxy)
     3306,   //mySQL
     3389,   //RDP (windows)
+    6443,   //Kubernetes api
     5000,   //flask
     5432,   //PostgreSQL
     8080,   //other http
@@ -72,13 +73,13 @@ void network_addr_req(const char* addr, uint16_t port, struct network_task_info 
             port_result.type = PORT_TYPE_MINECRAFT;
             minecraft_server_info_t res = protocol_get_minecraft_server_info(sockfd, port_result, info, msg);
         }
-        if(port == 80){
+        if(port == 80  || port == 8080){
             port_result.type = PORT_TYPE_HTTP;
             http_server_info_t res = protocol_get_http_server_info(sockfd, port_result, info, msg);
             free(res.return_type);
         }
 
-        //storage_save_port(port_result);
+        storage_save_port(port_result);
     }
     else{
         
@@ -175,6 +176,9 @@ int network_addr_search(const char* addr, struct network_task_info info){
         for(int i=1;i<search_ports[0];i++){
             network_addr_req(addr, search_ports[i],info);
         }
+    }
+    else if(info.port == -1){
+        network_addr_req(addr, rand()%65535,info);
     }
     else{
         network_addr_req(addr, info.port,info);

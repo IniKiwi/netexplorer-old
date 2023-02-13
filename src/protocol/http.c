@@ -3,7 +3,9 @@
 #define HTTP_RECV_BUFFER 10000
 
 int http_get(int sockfd, port_t addr, struct network_task_info info, char* buffer, size_t buffer_size , const char* path){
-    const char* http_req = "GET /path?query_string HTTP/1.0\r\n\r\n";
+    char* http_req = malloc(strlen(path)+100);
+    sprintf(http_req,"GET %s HTTP/1.0\r\n\r\n",path);
+
     size_t http_req_s = strlen(http_req);
     char* http_ret = buffer;
 
@@ -32,10 +34,26 @@ int http_get(int sockfd, port_t addr, struct network_task_info info, char* buffe
     return received;
 }
 
-http_server_info_t protocol_get_http_server_info(int sockfd, port_t addr, struct network_task_info info, char* msg){
+uint8_t http_find(int sockfd, port_t addr, struct network_task_info info, const char* str){
     char* http_ret = malloc(HTTP_RECV_BUFFER);
+    http_get(sockfd, addr, info, http_ret, HTTP_RECV_BUFFER, str);
 
-    http_get(sockfd, addr, info, http_ret, HTTP_RECV_BUFFER, "/");
+    char* http_content = strstr(http_ret,"\r\n\r\n");
+
+    if(strstr(http_content,str) != NULL){
+        free(http_ret);
+        return 1;
+    }
+
+    free(http_ret);
+    return 0;
+}
+
+http_server_info_t protocol_get_http_server_info(int sockfd, port_t addr, struct network_task_info info, char* msg){
+    //Index of
+    const char* path = "/";
+    char* http_ret = malloc(HTTP_RECV_BUFFER);
+    http_get(sockfd, addr, info, http_ret, HTTP_RECV_BUFFER, path);
 
     int http_ret_l = strlen(http_ret);
     int http_ret_wl = 0;
@@ -71,7 +89,7 @@ http_server_info_t protocol_get_http_server_info(int sockfd, port_t addr, struct
         ret_info.return_type = malloc(3);
         strcpy(ret_info.return_type,"-");
     }
-    sprintf(msg,"(%d %s)",ret_info.return_code,ret_info.return_type);
+    sprintf(msg,"\e[33mhttp://%s:%d%s \e[39m(%d %s)",addr.addr, addr.port, path, ret_info.return_code, ret_info.return_type);
 
     free(http_ret);
     return ret_info;

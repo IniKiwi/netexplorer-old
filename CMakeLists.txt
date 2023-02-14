@@ -9,7 +9,6 @@ set(
     src/storage.c
     src/protocol/minecraft.c
     src/protocol/http.c
-    src/protocol/ftp.c
     src/cJSON.c
 )
 

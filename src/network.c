@@ -17,6 +17,7 @@
 //bolt - green - OK! - normal color - normal text
 #define MSG_OK "\e[1m\e[32mOK\e[39m\e[0m"
 #define MSG_FAIL "\e[1m\e[31mFAIL\e[39m\e[0m"
+#define MSG_SKIPPED "\e[1m\e[33mSKIPPED\e[39m\e[0m"
 
 uint16_t search_ports[] = { 28,
     20,     //FTP
@@ -49,6 +50,10 @@ uint16_t search_ports[] = { 28,
 };
 
 void network_addr_req(const char* addr, uint16_t port, struct network_task_info info){
+    if(info.skip==1){
+        printf("try connect to %s:%d -> %s\n",addr,port,MSG_SKIPPED);
+        return;
+    }
     int sockfd = socket(AF_INET,SOCK_STREAM,0);
     struct timeval timeout;      
     timeout.tv_sec = 0;

@@ -31,9 +31,15 @@ typedef struct{
     port_t* results;
 } storage_result_t;
 
+typedef struct{
+    uint8_t ip[4][2];
+    uint16_t port[2];
+} storage_search_range_ipv4_t;
+
 port_t port_new(const char* addr, uint16_t port, uint16_t type);
 
 void storage_init();
 void storage_close();
 void storage_save_port(port_t port);
 storage_result_t storage_search_port(uint16_t port);
+storage_search_range_ipv4_t storage_decode_ipv4(const char* addr);

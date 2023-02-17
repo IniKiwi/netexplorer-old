@@ -132,48 +132,53 @@ int network_explore(const char* addr, struct network_task_info info){
 }
 
 int network_search_task(const char* addr, struct network_task_info info){
-    char* ip = malloc(strlen(addr));
-    strcpy(ip,addr);
-    uint8_t task_result[4][2];
-
-    int iplen = strlen(ip);
-    char* iplist = malloc(strlen(addr));
-    strcpy(iplist,addr);
-    for(int i=0;i<iplen;i++){
-        if(iplist[i] == '.'){
-            iplist[i] = '\0';
-        }
-    }
-
-    char* sip_ptr = iplist;
-    for(int i=0;i<4;i++){
-        if(strcmp(sip_ptr,"*")==0){
-            task_result[i][0] = 0;
-            task_result[i][1] = 255;
-            printf("ip%d 0-255\n",i);
-            sip_ptr += strlen(sip_ptr)+1;
-            continue;
-        }
-        task_result[i][0] = atoi(sip_ptr);
-        task_result[i][1] = atoi(sip_ptr);
-        sip_ptr += strlen(sip_ptr)+1;
-    }
+    srand(time(NULL));
+    storage_search_range_ipv4_t search = storage_decode_ipv4(addr);
 
     char* tmpip = malloc(50);
-    for(int ip0=task_result[0][0];ip0<=task_result[0][1];ip0++){
-        for(int ip1=task_result[1][0];ip1<=task_result[1][1];ip1++){
-            for(int ip2=task_result[2][0];ip2<=task_result[2][1];ip2++){
-                for(int ip3=task_result[3][0];ip3<=task_result[3][1];ip3++){
-                    sprintf(tmpip,"%d.%d.%d.%d",ip0,ip1,ip2,ip3);
-                    network_addr_search(tmpip, info);
+    if(search.ip_search == IP_SEARCH_RANGE){
+        for(int ip0=search.ip[0][0];ip0<=search.ip[0][1];ip0++){
+            for(int ip1=search.ip[1][0];ip1<=search.ip[1][1];ip1++){
+                for(int ip2=search.ip[2][0];ip2<=search.ip[2][1];ip2++){
+                    for(int ip3=search.ip[3][0];ip3<=search.ip[3][1];ip3++){
+                        sprintf(tmpip,"%d.%d.%d.%d",ip0,ip1,ip2,ip3);
+                        if(search.port_search == PORT_SEARCH_RANGE){
+                            for(int port=search.port[0];port<=search.port[1];port++){
+                                network_addr_req(tmpip, port, info);
+                            }
+                        }
+                        else if(search.port_search == PORT_SEARCH_POPULAR){
+                            for(int i=1;i<search_ports[0];i++){
+                                network_addr_req(tmpip, search_ports[i],info);
+                            }
+                        }
+                        else if(search.port_search == PORT_SEARCH_RANDOM){
+                            network_addr_req(tmpip, rand()%65535,info);
+                        }
+                    }
                 }
             }
         }
     }
-    free(ip);
+    else if(search.ip_search == IP_SEARCH_RANDOM){
+        for(size_t i=0;i<info.requests;i++){
+            sprintf(tmpip,"%d.%d.%d.%d",rand()%255,rand()%255,rand()%255,rand()%255);
+            if(search.port_search == PORT_SEARCH_RANGE){
+                for(int port=search.port[0];port<=search.port[1];port++){
+                    network_addr_req(tmpip, port, info);
+                }
+            }
+            else if(search.port_search == PORT_SEARCH_POPULAR){
+                for(int i=1;i<search_ports[0];i++){
+                    network_addr_req(tmpip, search_ports[i],info);
+                }
+            }
+            else if(search.port_search == PORT_SEARCH_RANDOM){
+                network_addr_req(tmpip, rand()%65535,info);
+            }
+        }
+    }
     free(tmpip);
-    free(iplist);
-    return 0;
 }
 
 int network_addr_search(const char* addr, struct network_task_info info){

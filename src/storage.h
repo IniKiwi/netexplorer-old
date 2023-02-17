@@ -19,6 +19,17 @@ enum{
     PORT_TYPE_MINECRAFT,
 };
 
+enum{
+    IP_SEARCH_RANGE,
+    IP_SEARCH_RANDOM,
+};
+
+enum{
+    PORT_SEARCH_RANGE,
+    PORT_SEARCH_POPULAR,
+    PORT_SEARCH_RANDOM,
+};
+
 typedef struct {
     uint16_t port;
     char* addr;
@@ -34,6 +45,8 @@ typedef struct{
 typedef struct{
     uint8_t ip[4][2];
     uint16_t port[2];
+    uint8_t port_search;
+    uint8_t ip_search;
 } storage_search_range_ipv4_t;
 
 port_t port_new(const char* addr, uint16_t port, uint16_t type);

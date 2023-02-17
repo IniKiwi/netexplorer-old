@@ -41,6 +41,8 @@ void storage_save_port(port_t port){
 
 storage_search_range_ipv4_t storage_decode_ipv4(const char* addr){
     storage_search_range_ipv4_t result;
+    result.ip_search = IP_SEARCH_RANGE;
+    result.port_search = PORT_SEARCH_POPULAR;
     result.port[0] = 0;
     result.port[1] = 65535;
 
@@ -56,26 +58,65 @@ storage_search_range_ipv4_t storage_decode_ipv4(const char* addr){
     }
 
     char* sip_ptr = iplist;
-    for(int i=0;i<4;i++){
-        if(strcmp(sip_ptr,"*")==0){
-            result.ip[i][0] = 0;
-            result.ip[i][1] = 255;
+    if(objects == 4 || objects == 5){
+        for(int i=0;i<4;i++){
+            if(strcmp(sip_ptr,"*")==0){
+                result.ip[i][0] = 0;
+                result.ip[i][1] = 255;
+                sip_ptr += strlen(sip_ptr)+1;
+                continue;
+            }
+            result.ip[i][0] = atoi(sip_ptr);
+            result.ip[i][1] = atoi(sip_ptr);
             sip_ptr += strlen(sip_ptr)+1;
-            continue;
         }
-        result.ip[i][0] = atoi(sip_ptr);
-        result.ip[i][1] = atoi(sip_ptr);
-        sip_ptr += strlen(sip_ptr)+1;
-    }
 
-    if(objects == 5){
-        if(strcmp(sip_ptr,"*")==0){
-            result.port[0] = 1;
-            result.port[1] = 65535;
-            return result;
+        if(objects == 5){
+            if(strcmp(sip_ptr,"*")==0){
+                result.port[0] = 1;
+                result.port[1] = 65535;
+                result.port_search = PORT_SEARCH_RANGE;
+                return result;
+            }
+            else if(strcmp(sip_ptr,"pop")==0 || strcmp(sip_ptr,"popular")==0){
+                result.port_search = PORT_SEARCH_POPULAR;
+                return result;
+            }
+            else if(strcmp(sip_ptr,"random")==0 || strcmp(sip_ptr,"rand")==0){
+                result.port_search = PORT_SEARCH_RANDOM;
+                return result;
+            }
+            result.port_search = PORT_SEARCH_RANGE;
+            result.port[0] = atoi(sip_ptr);
+            result.port[1] = atoi(sip_ptr);
         }
-        result.port[0] = atoi(sip_ptr);
-        result.port[1] = atoi(sip_ptr);
+    }
+    else if(objects == 2 || objects == 1){
+        result.ip_search = IP_SEARCH_RANDOM;
+        if(strcmp(sip_ptr,"random")==0 || strcmp(sip_ptr,"rand")==0){
+            result.ip_search = IP_SEARCH_RANDOM;
+        }
+        sip_ptr += strlen(sip_ptr)+1;
+
+        if(objects == 2){
+            if(strcmp(sip_ptr,"*")==0){
+                result.port[0] = 1;
+                result.port[1] = 65535;
+                result.port_search = PORT_SEARCH_RANGE;
+                return result;
+            }
+            else if(strcmp(sip_ptr,"pop")==0 || strcmp(sip_ptr,"popular")==0){
+                result.port_search = PORT_SEARCH_POPULAR;
+                return result;
+            }
+            else if(strcmp(sip_ptr,"random")==0 || strcmp(sip_ptr,"rand")==0){
+                result.port_search = PORT_SEARCH_RANDOM;
+                return result;
+            }
+            result.port_search = PORT_SEARCH_RANGE;
+            result.port[0] = atoi(sip_ptr);
+            result.port[1] = atoi(sip_ptr);
+        }
     }
     return result;
 }

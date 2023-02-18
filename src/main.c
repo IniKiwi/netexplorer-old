@@ -5,9 +5,7 @@
 #include "network.h"
 
 const char cli_help_msg[] = "IniKiwi's netexplorer\n" \
-"actions:\n" \
-"explore <ip>\n" \
-"scan <ip>\n";
+"the manual is on https://github.com/IniKiwi/netexplorer\n";
 
 int main(int argc, char *argv[]){
     if(argc == 1){

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(IniKiwiNetExplorer)
+project(inikiwi-netexplorer)
 
 set(
     SRCS
@@ -12,5 +12,5 @@ set(
     src/cJSON.c
 )
 
-add_executable(IniKiwiNetExplorer ${SRCS} ${HEADERS})
-target_link_libraries(IniKiwiNetExplorer PRIVATE sqlite3 pthread )
+add_executable(inikiwi-netexplorer ${SRCS} ${HEADERS})
+target_link_libraries(inikiwi-netexplorer PRIVATE sqlite3 pthread )

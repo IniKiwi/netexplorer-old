@@ -17,6 +17,11 @@ enum{
     LOG_OK
 };
 
+enum{
+    NETWORK_TASK_TASK,
+    NETWORK_TASK_MULTITHREAD,
+};
+
 struct network_task_info{
     uint8_t skip;
     uint16_t threads;
@@ -26,10 +31,11 @@ struct network_task_info{
     uint32_t port;
 };
 
-int network_addr_search(const char* addr, struct network_task_info info);
-int network_search_local(uint8_t subnet, struct network_task_info info);
-int network_search_task(const char* addr, struct network_task_info info);
-int network_explore(const char* addr, struct network_task_info info);
-void* network_search_random(void* _info);
+struct network_search_task_args{
+    const char* addr;
+    struct network_task_info info;
+};
+
+int network_search_task(const char* addr, struct network_task_info info, int task_opt);
 void storage_search_print(storage_search_range_ipv4_t search, struct network_task_info info);
 void network_addr_req(const char* addr, uint16_t port, struct network_task_info info);

@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
     for(int a=1;a<argc;a++){
         if(strcmp("explore",argv[a]) == 0){
             if(argc < a+1){exit(1);}
-            network_search_task(argv[a+1],info);
+            network_search_task(argv[a+1],info, NETWORK_TASK_MULTITHREAD);
         }
         if(strcmp("search",argv[a]) == 0){
             if(argc < a+1){exit(1);}

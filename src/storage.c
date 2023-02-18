@@ -131,13 +131,10 @@ void storage_search_print(storage_search_range_ipv4_t search, struct network_tas
                 for(int ip3=search.ip[3][0];ip3<=search.ip[3][1];ip3++){
                     for(int port=search.port[0];port<=search.port[1];port++){
                         sprintf(tmpip,"%d.%d.%d.%d",ip0,ip1,ip2,ip3);
-                        //printf("%s\n",tmpip);
                         char* querys = sqlite3_mprintf("SELECT * FROM ports WHERE addr='%q' AND port=%d;", tmpip, port);
                         if(sqlite3_prepare_v2(db, querys, -1, &stmt, NULL) == SQLITE_OK){
                             while (sqlite3_step(stmt) != SQLITE_DONE) {
-                                //printf("%s:%d\n",sqlite3_column_text(stmt,1), sqlite3_column_int(stmt,2));
-                                info.port = sqlite3_column_int(stmt,2);
-                                network_addr_search(sqlite3_column_text(stmt,1),info);
+                                network_addr_req(sqlite3_column_text(stmt,1),sqlite3_column_int(stmt,2),info);
                             }
                             sqlite3_finalize(stmt);
                         }

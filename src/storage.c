@@ -39,6 +39,13 @@ void storage_save_port(port_t port){
     sqlite3_finalize(stmt);
 };
 
+/*storage_search_range_ipv4_t storage_search_range_ipv4_divide(storage_search_range_ipv4_t src, int d){
+    storage_search_range_ipv4_t result = src;
+    for(int i=0;i<4;i++){
+        result.ip[i][1] = (src.ip[i][1] - src.ip[i][0])/d;
+    }
+}*/
+
 storage_search_range_ipv4_t storage_decode_ipv4(const char* addr){
     storage_search_range_ipv4_t result;
     result.ip_search = IP_SEARCH_RANGE;
@@ -144,6 +151,23 @@ void storage_search_print(storage_search_range_ipv4_t search, struct network_tas
         }
     }
     free(tmpip);
+};
+
+int storage_converter_str_type(const char* str){
+    if(strcmp(str,"http")==0){return PORT_TYPE_HTTP;}
+    if(strcmp(str,"minecraft")==0){return PORT_TYPE_MINECRAFT;}
+}
+
+void storage_list_type_print(int porttype, struct network_task_info info){
+    sqlite3_stmt *stmt;
+    char* querys = sqlite3_mprintf("SELECT * FROM ports WHERE type=%d;", porttype);
+    if(sqlite3_prepare_v2(db, querys, -1, &stmt, NULL) == SQLITE_OK){
+        while (sqlite3_step(stmt) != SQLITE_DONE) {
+            network_addr_req(sqlite3_column_text(stmt,1),sqlite3_column_int(stmt,2),info);
+        }
+        
+    }
+    sqlite3_finalize(stmt);
 };
 
 void storage_close(){

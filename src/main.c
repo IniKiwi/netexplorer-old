@@ -30,6 +30,10 @@ int main(int argc, char *argv[]){
             if(argc < a+1){exit(1);}
             storage_search_print(storage_decode_ipv4(argv[a+1]), info);
         }
+        if(strcmp("list-type",argv[a]) == 0){
+            if(argc < a+1){exit(1);}
+            storage_list_type_print(storage_converter_str_type(argv[a+1]), info);
+        }
         else if(strcmp("-j",argv[a]) == 0){
             if(argc < a+1){exit(1);}
             info.threads = atoi(argv[a+1]);

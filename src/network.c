@@ -76,13 +76,15 @@ void network_addr_req(const char* addr, uint16_t port, struct network_task_info 
     if(connect(sockfd, (struct sockaddr*)&server, sizeof(server)) != -1){
         port_result.type = PORT_TYPE_UNKNOW;
         if(port == 25565){
-            port_result.type = PORT_TYPE_MINECRAFT;
             minecraft_server_info_t res = protocol_get_minecraft_server_info(sockfd, port_result, info, msg);
+            if(res.status == STATUS_OK){port_result.type = PORT_TYPE_MINECRAFT;}
         }
         if(port == 80  || port == 8080 || port == 8000){
-            port_result.type = PORT_TYPE_HTTP;
             http_server_info_t res = protocol_get_http_server_info(sockfd, port_result, info, msg);
-            free(res.return_type);
+            if(res.status == STATUS_OK){
+                port_result.type = PORT_TYPE_HTTP;
+                free(res.return_type);
+            }
         }
 
         storage_save_port(port_result);

@@ -70,6 +70,10 @@ http_server_info_t protocol_get_http_server_info(int sockfd, port_t addr, struct
     char* http_ret_i = http_ret;
     http_ret_i += strlen(http_ret_i)+1;
     ret_info.return_code = atoi(http_ret_i);
+    if(ret_info.return_code == 0){
+        ret_info.status = STATUS_FAIL;
+        return ret_info;
+    }
 
     char ret_type_found = 0;
 

@@ -56,3 +56,4 @@ void storage_close();
 void storage_save_port(port_t port);
 storage_result_t storage_search_port(uint16_t port);
 storage_search_range_ipv4_t storage_decode_ipv4(const char* addr);
+int storage_converter_str_type(const char* str);

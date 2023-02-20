@@ -36,7 +36,14 @@ struct network_search_task_args{
     struct network_task_info info;
 };
 
+struct network_addr_req_args{
+    char* addr;
+    uint16_t port;
+    struct network_task_info info;
+};
+
 int network_search_task(const char* addr, struct network_task_info info, int task_opt);
 void storage_search_print(storage_search_range_ipv4_t search, struct network_task_info info);
 void storage_list_type_print(int porttype, struct network_task_info info);
 void network_addr_req(const char* addr, uint16_t port, struct network_task_info info);
+void network_threaded_addr_req(const char* addr, uint16_t port, struct network_task_info info);

@@ -114,7 +114,37 @@ void* network_search_task_thread(void* args){
     //printf("%d\n",network_search_task_threads);
 }
 
+void* network_addr_req_thread(void* args){
+    network_search_task_threads++;
+    //printf("%d\n",network_search_task_threads);
+    struct network_addr_req_args* a = args;
+    network_addr_req(a->addr,a->port,a->info);
+    //printf("-%08x\n",a->addr);
+    free(a->addr);
+    free(a);
+    network_search_task_threads--;
+    //printf("%d\n",network_search_task_threads);
+}
+
+void network_threaded_addr_req(const char* addr, uint16_t port, struct network_task_info info){
+    while(1){
+        if(network_search_task_threads < info.threads){
+            char* addr2 = malloc(strlen(addr)+1);
+            //printf("%08x\n",addr2);
+            strcpy(addr2,addr);
+            struct network_addr_req_args* a = malloc(sizeof(struct network_addr_req_args));
+            a->addr=addr2;
+            a->info=info;
+            a->port=port;
+            pthread_t thread;
+            pthread_create(&thread, NULL, &network_addr_req_thread, (void*)a);
+            return;
+        }
+    }
+}
+
 int network_search_task(const char* addr, struct network_task_info info, int task_opt){
+    int s = network_search_task_threads;
     srand(time(NULL));
     storage_search_range_ipv4_t search = storage_decode_ipv4(addr);
 
@@ -125,18 +155,19 @@ int network_search_task(const char* addr, struct network_task_info info, int tas
                 for(int ip2=search.ip[2][0];ip2<=search.ip[2][1];ip2++){
                     for(int ip3=search.ip[3][0];ip3<=search.ip[3][1];ip3++){
                         sprintf(tmpip,"%d.%d.%d.%d",ip0,ip1,ip2,ip3);
+                        //printf("%s\n",tmpip);
                         if(search.port_search == PORT_SEARCH_RANGE){
                             for(int port=search.port[0];port<=search.port[1];port++){
-                                network_addr_req(tmpip, port, info);
+                                network_threaded_addr_req(tmpip, port, info);
                             }
                         }
                         else if(search.port_search == PORT_SEARCH_POPULAR){
                             for(int i=1;i<search_ports[0];i++){
-                                network_addr_req(tmpip, search_ports[i],info);
+                                network_threaded_addr_req(tmpip, search_ports[i],info);
                             }
                         }
                         else if(search.port_search == PORT_SEARCH_RANDOM){
-                            network_addr_req(tmpip, rand()%65535,info);
+                            network_threaded_addr_req(tmpip, rand()%65535,info);
                         }
                     }
                 }
@@ -144,38 +175,29 @@ int network_search_task(const char* addr, struct network_task_info info, int tas
         }
     }
     else if(search.ip_search == IP_SEARCH_RANDOM){
-        if(network_search_task_threads < info.threads && task_opt == NETWORK_TASK_MULTITHREAD){
-            int s = network_search_task_threads;
-            while (network_search_task_threads < info.threads){
-                pthread_t thread;
-                struct network_search_task_args arg = {
-                    .addr = addr,
-                    .info = info,
-                };
-                pthread_create(&thread, NULL, &network_search_task_thread, (void*)&arg);
+        size_t i=0;
+        size_t r=info.requests;
+        if(info.requests==0){r=1;}
+        while(i<r){
+            sprintf(tmpip,"%d.%d.%d.%d",rand()%255,rand()%255,rand()%255,rand()%255);
+            if(search.port_search == PORT_SEARCH_RANGE){
+                for(int port=search.port[0];port<=search.port[1];port++){
+                    network_threaded_addr_req(tmpip, port, info);
+                }
             }
-            while(network_search_task_threads != s){
-                
+            else if(search.port_search == PORT_SEARCH_POPULAR){
+                for(int i=1;i<search_ports[0];i++){
+                    network_threaded_addr_req(tmpip, search_ports[i],info);
+                }
             }
+            else if(search.port_search == PORT_SEARCH_RANDOM){
+                network_threaded_addr_req(tmpip, rand()%65535,info);
+            }
+            if(info.requests!=0){i++;}
         }
-        else{
-            for(size_t i=0;i<info.requests;i++){
-                sprintf(tmpip,"%d.%d.%d.%d",rand()%255,rand()%255,rand()%255,rand()%255);
-                if(search.port_search == PORT_SEARCH_RANGE){
-                    for(int port=search.port[0];port<=search.port[1];port++){
-                        network_addr_req(tmpip, port, info);
-                    }
-                }
-                else if(search.port_search == PORT_SEARCH_POPULAR){
-                    for(int i=1;i<search_ports[0];i++){
-                        network_addr_req(tmpip, search_ports[i],info);
-                    }
-                }
-                else if(search.port_search == PORT_SEARCH_RANDOM){
-                    network_addr_req(tmpip, rand()%65535,info);
-                }
-            }
-        }
+    }
+    while(network_search_task_threads != s){
+        
     }
     free(tmpip);
 }

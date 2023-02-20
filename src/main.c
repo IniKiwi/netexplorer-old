@@ -16,7 +16,7 @@ int main(int argc, char *argv[]){
     struct network_task_info info = {
         .timeout = 500000,
         .threads = 5,
-        .requests = 50,
+        .requests = 0,
         .log_mode = LOG_ALL,
         .port = 0,
         .skip = 0
